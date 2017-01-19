@@ -1,0 +1,6 @@
+create a cell for each thread, or create when needed
+synchronize between gens
+wait until a gen is completey done
+probably use thread pools
+use wait notify
+runnable

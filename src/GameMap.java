@@ -5,7 +5,7 @@ import java.util.List;
 public class GameMap
 	{
 		public static final boolean					DEBUG	= false;
-		HashMap<Integer, HashMap<Integer, Cell>>	gameMap	= new HashMap<Integer, HashMap<Integer, Cell>>();
+		HashMap<Integer, HashMap<Integer, CellThread>>	gameMap	= new HashMap<Integer, HashMap<Integer, CellThread>>();
 		int											width;
 		int											height;
 		int											gen		= 0;
@@ -19,7 +19,7 @@ public class GameMap
 
 		private void initCells()
 			{
-				gameMap.put(gen, new HashMap<Integer, Cell>());
+				gameMap.put(gen, new HashMap<Integer, CellThread>());
 				for (int w = 0; w < width; w++)
 					{
 						for (int h = 0; h < height; h++)
@@ -29,13 +29,13 @@ public class GameMap
 					}
 			}
 
-		public Cell getCell(int gen, int x, int y)
+		public CellThread getCell(int gen, int x, int y)
 			{
 				int loc = (x + y * width);
-				Cell res = gameMap.get(gen).get(loc);
+				CellThread res = gameMap.get(gen).get(loc);
 				if (res == null)
 					{
-						res = new Cell(false, x, y);
+						res = new CellThread(false, x, y);
 						gameMap.get(gen).put(loc, res);
 					}
 				return res;
@@ -43,7 +43,7 @@ public class GameMap
 
 		public void setCell(int x, int y)
 			{
-				Cell c = getCell(0, x, y);
+				CellThread c = getCell(0, x, y);
 				c.isAlive(true);
 			}
 
