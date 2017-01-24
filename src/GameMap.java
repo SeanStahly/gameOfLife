@@ -5,7 +5,11 @@ import java.util.List;
 public class GameMap
 	{
 		public static final boolean					DEBUG	= false;
-		HashMap<Integer, HashMap<Integer, CellThread>>	gameMap	= new HashMap<Integer, HashMap<Integer, CellThread>>();
+		HashMap<Integer, CellThread> gameMap	= new HashMap<Integer, CellThread>();
+        //hashmap - <gen <location, count>>
+//        HashMap<Integer,HashMap <CellThread, Integer>> genList = new HashMap<Integer, HashMap<Integer, Integer>>();
+        //<cell, count>
+        HashMap<CellThread, Integer> cellCount = new HashMap<CellThread, Integer>();
 		int											width;
 		int											height;
 		int											gen		= 0;
@@ -19,31 +23,31 @@ public class GameMap
 
 		private void initCells()
 			{
-				gameMap.put(gen, new HashMap<Integer, CellThread>());
+//                gameMap.put(gen, new HashMap<Integer, CellThread>());
 				for (int w = 0; w < width; w++)
 					{
 						for (int h = 0; h < height; h++)
 							{
-								getCell(gen, w, h);
+								getCell(w, h);
 							}
 					}
 			}
 
-		public CellThread getCell(int gen, int x, int y)
+		public CellThread getCell(int x, int y)
 			{
 				int loc = (x + y * width);
-				CellThread res = gameMap.get(gen).get(loc);
+				CellThread res = gameMap.get(loc);
 				if (res == null)
 					{
 						res = new CellThread(false, x, y);
-						gameMap.get(gen).put(loc, res);
+						gameMap.put(loc, res);
 					}
 				return res;
 			}
 
 		public void setCell(int x, int y)
 			{
-				CellThread c = getCell(0, x, y);
+				CellThread c = getCell(x, y);
                 synchronized (c) {
                     c.notify();
                 }
@@ -56,7 +60,7 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								CellThread c = getCell(gen, w, h);
+								CellThread c = getCell(w, h);
 								System.out.print(c);
 
 							}
@@ -70,7 +74,7 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								CellThread c = getCell(gen, w, h);
+								CellThread c = getCell(w, h);
 
 								if (c.isAlive())
 									{
@@ -90,27 +94,27 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								CellThread p = getCell(gen - 1, w, h);
-								CellThread c = getCell(gen, w, h);
+								CellThread p = getCell(w, h);
+								CellThread c = getCell(w, h);
 								if (DEBUG)
 									{
 										System.out.println("-------------------");
 //										System.out.println(c);
 										System.out.println("....................");
 									}
-								List<CellThread> l = getNeighbors(gen - 1, c);
+//								List<CellThread> l = getNeighbors(gen - 1, c);
 								int count = 0;
-								for (CellThread n : l)
-									{
-										if (DEBUG)
-											{
-												System.out.println(n);
-											}
+//								for (CellThread n : l)
+//									{
+//										if (DEBUG)
+//											{
+//												System.out.println(n);
+//											}
 //										if (n.getAlive())
 //											{
 //												count++;
 //											}
-									}
+//									}
 //								c.isAlive(p.getAlive());
 //								if (p.getAlive())
 //									{
@@ -132,44 +136,106 @@ public class GameMap
 
 			}
 
-		public List<CellThread> getNeighbors(int gen, CellThread c)
-			{
-				LinkedList<CellThread> result = new LinkedList();
-				// 1 2 3
-				// 4 X 5
-				// 6 7 8
-				if (c.getX() > 0 && c.getY() > 0) // 1
-					{
-						result.add(getCell(gen, c.getX() - 1, c.getY() - 1));
-					}
-				if (c.getX() > 0) // 2
-					{
-						result.add(getCell(gen, c.getX() - 1, c.getY()));
-					}
-				if (c.getX() > 0 && c.getY() < height - 1) // 3
-					{
-						result.add(getCell(gen, c.getX() - 1, c.getY() + 1));
-					}
-				if (c.getY() > 0) // 4
-					{
-						result.add(getCell(gen, c.getX(), c.getY() - 1));
-					}
-				if (c.getY() < height - 1) // 5
-					{
-						result.add(getCell(gen, c.getX(), c.getY() + 1));
-					}
-				if (c.getX() < width - 1 && c.getY() > 0) // 6
-					{
-						result.add(getCell(gen, c.getX() + 1, c.getY() - 1));
-					}
-				if (c.getX() < width - 1) // 7
-					{
-						result.add(getCell(gen, c.getX() + 1, c.getY()));
-					}
-				if (c.getX() < width - 1 && c.getY() < height - 1) // 8
-					{
-						result.add(getCell(gen, c.getX() + 1, c.getY() + 1));
-					}
-				return result;
-			}
+
+        public void getNeighbors(int gen, CellThread c)
+        {
+            cellCount.putIfAbsent(c, 0);
+            // 1 2 3
+            // 4 X 5
+            // 6 7 8
+            if (c.getX() > 0 && c.getY() > 0) // 1
+            {
+
+                CellThread a = (getCell(c.getX() - 1, c.getY() - 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getX() > 0) // 2
+            {
+                CellThread a = (getCell(c.getX() - 1, c.getY()));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getX() > 0 && c.getY() < height - 1) // 3
+            {
+                CellThread a = (getCell(c.getX() - 1, c.getY() + 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getY() > 0) // 4
+            {
+                CellThread a = (getCell(c.getX(), c.getY() - 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getY() < height - 1) // 5
+            {
+                CellThread a = (getCell(c.getX(), c.getY() + 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getX() < width - 1 && c.getY() > 0) // 6
+            {
+                CellThread a = (getCell(c.getX() + 1, c.getY() - 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getX() < width - 1) // 7
+            {
+                CellThread a = (getCell(c.getX() + 1, c.getY()));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+            if (c.getX() < width - 1 && c.getY() < height - 1) // 8
+            {
+                CellThread a = (getCell(c.getX() + 1, c.getY() + 1));
+                cellCount.putIfAbsent(a, 0);
+                cellCount.put(a, cellCount.get(a) +1);
+            }
+        }
+//        public void betterNextgen(int newGen, CellThread cellThread) {
+//            getNeighbors()
+//        }
+
+
+//		public List<CellThread> getNeighbors(int gen, CellThread c)
+//			{
+//				LinkedList<CellThread> result = new LinkedList();
+//				// 1 2 3
+//				// 4 X 5
+//				// 6 7 8
+//				if (c.getX() > 0 && c.getY() > 0) // 1
+//					{
+//						result.add(getCell(c.getX() - 1, c.getY() - 1));
+//					}
+//				if (c.getX() > 0) // 2
+//					{
+//						result.add(getCell(c.getX() - 1, c.getY()));
+//					}
+//				if (c.getX() > 0 && c.getY() < height - 1) // 3
+//					{
+//						result.add(getCell(c.getX() - 1, c.getY() + 1));
+//					}
+//				if (c.getY() > 0) // 4
+//					{
+//						result.add(getCell(c.getX(), c.getY() - 1));
+//					}
+//				if (c.getY() < height - 1) // 5
+//					{
+//						result.add(getCell(c.getX(), c.getY() + 1));
+//					}
+//				if (c.getX() < width - 1 && c.getY() > 0) // 6
+//					{
+//						result.add(getCell(c.getX() + 1, c.getY() - 1));
+//					}
+//				if (c.getX() < width - 1) // 7
+//					{
+//						result.add(getCell(c.getX() + 1, c.getY()));
+//					}
+//				if (c.getX() < width - 1 && c.getY() < height - 1) // 8
+//					{
+//						result.add(getCell(c.getX() + 1, c.getY() + 1));
+//					}
+//				return result;
+//			}
 	}
