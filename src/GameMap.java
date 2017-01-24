@@ -44,7 +44,10 @@ public class GameMap
 		public void setCell(int x, int y)
 			{
 				CellThread c = getCell(0, x, y);
-				c.isAlive(true);
+                synchronized (c) {
+                    c.notify();
+                }
+//				c.isAlive(true);
 			}
 
 		public void printMap(int gen)
@@ -53,7 +56,7 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								Cell c = getCell(gen, w, h);
+								CellThread c = getCell(gen, w, h);
 								System.out.print(c);
 
 							}
@@ -67,8 +70,9 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								Cell c = getCell(gen, w, h);
-								if (c.getAlive())
+								CellThread c = getCell(gen, w, h);
+
+								if (c.isAlive())
 									{
 										System.out.print(c.DebugString());
 									}
@@ -86,51 +90,51 @@ public class GameMap
 					{
 						for (int h = 0; h < height; h++)
 							{
-								Cell p = getCell(gen - 1, w, h);
-								Cell c = getCell(gen, w, h);
+								CellThread p = getCell(gen - 1, w, h);
+								CellThread c = getCell(gen, w, h);
 								if (DEBUG)
 									{
 										System.out.println("-------------------");
-										System.out.println(c);
+//										System.out.println(c);
 										System.out.println("....................");
 									}
-								List<Cell> l = getNeighbors(gen - 1, c);
+								List<CellThread> l = getNeighbors(gen - 1, c);
 								int count = 0;
-								for (Cell n : l)
+								for (CellThread n : l)
 									{
 										if (DEBUG)
 											{
 												System.out.println(n);
 											}
-										if (n.getAlive())
-											{
-												count++;
-											}
+//										if (n.getAlive())
+//											{
+//												count++;
+//											}
 									}
-								c.isAlive(p.getAlive());
-								if (p.getAlive())
-									{
-										if (count < 2 || count > 3)
-											{
-												c.isAlive(false);
-											}
-									}
-								else
-									{
-										if (count == 3)
-											{
-												c.isAlive(true);
-											}
-									}
+//								c.isAlive(p.getAlive());
+//								if (p.getAlive())
+//									{
+//										if (count < 2 || count > 3)
+//											{
+//												c.isAlive(false);
+//											}
+//									}
+//								else
+//									{
+//										if (count == 3)
+//											{
+//												c.isAlive(true);
+//											}
+//									}
 
 							}
 					}
 
 			}
 
-		public List<Cell> getNeighbors(int gen, Cell c)
+		public List<CellThread> getNeighbors(int gen, CellThread c)
 			{
-				LinkedList<Cell> result = new LinkedList();
+				LinkedList<CellThread> result = new LinkedList();
 				// 1 2 3
 				// 4 X 5
 				// 6 7 8
