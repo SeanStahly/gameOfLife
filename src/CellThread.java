@@ -1,7 +1,7 @@
 /**
  * Created by sean on 1/19/17.
  */
-public class CellThread extends Thread {
+public class CellThread implements Runnable {
 
     private int gen;
     private int x;
@@ -37,34 +37,41 @@ public class CellThread extends Thread {
         super();
     }
 
+
+
     @Override
     public String toString()
     {
         String result = "";
         if (GameMap.DEBUG)
             result = "[" + x + "," + y + "]";
-        if (this.isAlive())
-        {
-            result += "X";
-        }
-        else
-        {
-            result += "_";
-        }
+//        if (this.isAlive())
+//        {
+//            result += "X";
+//        }
+//        else
+//        {
+//            result += "_";
+//        }
         return result;
     }
 
     public String DebugString()
     {
         String result = "[" + x + "," + y + "]";
-        if (this.isAlive())
-        {
-            result += "X";
-        }
-        else
-        {
-            result += "_";
-        }
+//        if (this.isAlive())
+//        {
+//            result += "X";
+//        }
+//        else
+//        {
+//            result += "_";
+//        }
         return result;
+    }
+
+    @Override
+    public void run() {
+
     }
 }

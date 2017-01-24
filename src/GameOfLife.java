@@ -1,3 +1,5 @@
+import java.util.concurrent.ForkJoinPool;
+
 public class GameOfLife
 	{
 		public static void main(String[] args)
@@ -14,13 +16,14 @@ public class GameOfLife
 				g.setCell(2, 5);
 				g.printMap2(0);
 				System.out.println();
+				ForkJoinPool pool = new ForkJoinPool(3);
 				for (int i = 1; i < 10; i++)
 					{
-						g.nextGen();
+//						g.nextGen();
 						// System.out.println();
 						// g.printMap(i);
-						System.out.println("\nIteration " + i);
-						g.printMap2(i);
+//						System.out.println("\nIteration " + i);
+//						g.printMap2(i);
 					}
 
 			}
