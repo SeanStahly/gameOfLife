@@ -1,9 +1,11 @@
+import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class GameMap
 {
@@ -74,8 +76,9 @@ public class GameMap
     public void printMap2(int gen)
     {
         for(CellThread ct : gameMap.get(gen).values()) {
-            System.out.println(ct.debugString());
+            System.out.print(ct.debugString());
         }
+        System.out.println("COUNT: "+gameMap.get(gen).values().size());
 
 //        for (int w = 0; w < width; w++)
 //        {
@@ -92,19 +95,32 @@ public class GameMap
 //        }
     }
 
-    public void nextGen()
-    {
+    public void nextGen() {
         gen++;
         ForkJoinPool pool = new ForkJoinPool(3);
-        List<Future<List<Integer>>> res = pool.invokeAll(gameMap.get(gen - 1).values());
+        List<Future<List<Point>>> res = pool.invokeAll(gameMap.get(gen - 1).values());
 
-        List<Integer> nextGen = new LinkedList<Integer>();
+        List<Point> nextGen = new LinkedList<Point>();
 
         res.forEach(x -> {
             try {
-                List<Integer> list = x.get();
-                if (list != null) {
-                    nextGen.addAll(list);
+                List<Point> list = x.get();
+                if (list.size() > 1) {
+                    list.remove(0);
+                    synchronized (nextGen) {
+                        nextGen.addAll(list.stream()
+                                .filter(y ->
+                                        !nextGen.contains(y))
+                                .collect(Collectors.toList()));
+
+
+                    }
+                } else {
+                    synchronized (gameMap) {
+                        Point p = list.get(0);
+                        int loc = p.x + p.y * width;
+                        gameMap.get(gen -1).remove(loc);
+                    }
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -113,10 +129,16 @@ public class GameMap
             }
         });
 
+
         System.out.println("blarg");
+        gameMap.put(gen, new HashMap<Integer, CellThread>());
+        nextGen.forEach( point -> {
+            int loc = point.x + point.y * width;
+            gameMap.get(gen).put(loc, new CellThread(point.x, point.y, height, width, gameMap.get(gen -1)));
+        });
 
 
-
+    }
 
 //        initCells();
 //        for (int w = 0; w < width; w++)
@@ -163,7 +185,7 @@ public class GameMap
 //            }
 //        }
 
-    }
+//    }
 
 //    public List<Cell> getNeighbors(int gen, Cell c)
 //    {

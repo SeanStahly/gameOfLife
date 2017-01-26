@@ -33,9 +33,10 @@ public class GameOfLife
         g.printMap2(0);
 //				}
         System.out.println();
+        g.nextGen();
 //				ForkJoinPool pool = new ForkJoinPool(3);
 //        for (int i = 1; i < GENERATIONS; i++)
-        for (int i = 1; i < 2; i++)
+        for (int i = 1; i < 10; i++)
         {
             g.nextGen();
             System.out.println();
