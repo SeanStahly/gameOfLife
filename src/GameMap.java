@@ -10,46 +10,20 @@ import java.util.stream.Collectors;
 
 public class GameMap implements GameInterface
 {
+    // Variable Initialization
     public static final boolean					DEBUG	= false;
+
+    // Initialization of a new Hashmap to hold the current generation as the key
+    // and the current iteration of cells
     HashMap<Integer, HashMap<Integer, CellThread>>	gameMap	= new HashMap<Integer, HashMap<Integer, CellThread>>();
     int											width;
     int											height;
     int											gen		= 0;
 
     public GameMap() {
+        // Initialization of the first generation
         gameMap.put(gen, new HashMap<Integer, CellThread>());
     }
-//    public GameMap(int w, int h)
-//    {
-//        width = w;
-//        height = h;
-//        gameMap.put(gen, new HashMap<Integer, CellThread>());
-//        initCells();
-//    }
-
-//    private void initCells()
-//    {
-//        gameMap.put(gen, new HashMap<Integer, CellThread>());
-//        for (int w = 0; w < width; w++)
-//        {
-//            for (int h = 0; h < height; h++)
-//            {
-//                getCell(gen, w, h);
-//            }
-//        }
-//    }
-
-//    public CellThread getCell(int gen, int x, int y)
-//    {
-//        int loc = (x + y * width);
-//        CellThread res = gameMap.get(gen).get(loc);
-//        if (res == null)
-//        {
-//            res = new CellThread(x, y, );
-//            gameMap.get(gen).put(loc, res);
-//        }
-//        return res;
-//    }
 
     @Override
     public void setWidth(int w) {
@@ -61,13 +35,18 @@ public class GameMap implements GameInterface
         height = h;
     }
 
+    /**
+     * Creates a new CellThread object and inserts it along with
+     * the x and y coordinates into the hashmap that holds the
+     * current generation.
+     * @param x Coordinate
+     * @param y Coordinate
+     */
     public void setCell(int x, int y)
     {
         int loc = (x + y * width);
         CellThread ct= new CellThread(x, y, height, width, new HashMap<Integer, CellThread>());
         gameMap.get(0).put(loc, ct);
-//        CellThread c = getCell(gen, x, y);
-//        c.isAlive(true);
     }
 
     public void printMap(int gen)
@@ -75,24 +54,18 @@ public class GameMap implements GameInterface
         for(CellThread ct : gameMap.get(gen).values()) {
             System.out.println(ct);
         }
-//        for (int w = 0; w < width; w++)
-//        {
-//            for (int h = 0; h < height; h++)
-//            {
-//                Cell c = getCell(gen, w, h);
-//                System.out.print(c);
-//
-//            }
-//            System.out.println();
-//        }
     }
 
+    /**
+     * Prints the game map of the current generation
+     * @param gen Current generation of cells to print
+     */
     public void printMap2(int gen)
     {
         Comparator<CellThread> comparator = Comparator.comparing(CellThread::getX);
         comparator.thenComparing(Comparator.comparing(CellThread::getY));
 
-
+        // Comparing the x and y values using the comparator to sort then compare
         List<CellThread> cellThreads = new LinkedList<>(
                 gameMap.get(gen).values().stream()
                         .sorted(comparator)
@@ -103,35 +76,30 @@ public class GameMap implements GameInterface
         }
         System.out.println();
         System.out.println("COUNT: "+gameMap.get(gen).values().size());
-
-//        for (int w = 0; w < width; w++)
-//        {
-//            for (int h = 0; h < height; h++)
-//            {
-//                CellThread c = getCell(gen, w, h);
-//                if (c.getAlive())
-//                {
-//                    System.out.print(c.DebugString());
-//                }
-//
-//            }
-//
-//        }
     }
 
     public void nextGen() {
         gen++;
+
+        // Creates the ExecutorService object and initializes the parallelism to use three cores at most
         ForkJoinPool pool = new ForkJoinPool(3);
+
+        // Wakes all the threads and grabs the values from generation - 1
         List<Future<List<Point>>> res = pool.invokeAll(gameMap.get(gen - 1).values());
 
         List<Point> nextGen = new LinkedList<Point>();
 
+        // Iterates through each item of the list of future lists
         res.forEach(x -> {
             try {
                 List<Point> list = x.get();
+
                 if (list.size() > 1) {
                     list.remove(0);
+
+                    // Syncing up so we don't have multiple threads modifying the list at once
                     synchronized (nextGen) {
+                        // Adds new items to the list and filters out the ones that have the same x and y points
                         nextGen.addAll(list.stream()
                                 .filter(y ->
                                         !nextGen.contains(y))
@@ -140,6 +108,8 @@ public class GameMap implements GameInterface
 
                     }
                 } else {
+
+                    // Syncing up so we don't have multiple threads editing the hashmap
                     synchronized (gameMap) {
                         Point p = list.get(0);
                         int loc = p.x + p.y * width;
@@ -153,111 +123,20 @@ public class GameMap implements GameInterface
             }
         });
 
-//        nextGen.stream()         .sorted((e1, e2) -> P
-////                .collect(Collectors.toList());
-//
-//        );
+        // Creates the new generation's hashmap
         gameMap.put(gen, new HashMap<Integer, CellThread>());
+
+        // Starts initialization of CellThread Objects in the new generation
         nextGen.forEach( point -> {
             int loc = point.x + point.y * width;
             gameMap.get(gen).put(loc, new CellThread(point.x, point.y, height, width, gameMap.get(gen -1)));
         });
-
-
     }
 
-//        initCells();
-//        for (int w = 0; w < width; w++)
-//        {
-//            for (int h = 0; h < height; h++)
-//            {
-//                Cell p = getCell(gen - 1, w, h);
-//                Cell c = getCell(gen, w, h);
-//                if (DEBUG)
-//                {
-//                    System.out.println("-------------------");
-//                    System.out.println(c);
-//                    System.out.println("....................");
-//                }
-//                List<Cell> l = getNeighbors(gen - 1, c);
-//                int count = 0;
-//                for (Cell n : l)
-//                {
-//                    if (DEBUG)
-//                    {
-//                        System.out.println(n);
-//                    }
-//                    if (n.getAlive())
-//                    {
-//                        count++;
-//                    }
-//                }
-//                c.isAlive(p.getAlive());
-//                if (p.getAlive())
-//                {
-//                    if (count < 2 || count > 3)
-//                    {
-//                        c.isAlive(false);
-//                    }
-//                }
-//                else
-//                {
-//                    if (count == 3)
-//                    {
-//                        c.isAlive(true);
-//                    }
-//                }
-//
-//            }
-//        }
-
-//    }
-
-//    public List<Cell> getNeighbors(int gen, Cell c)
-//    {
-//        LinkedList<Cell> result = new LinkedList();
-//        // 1 2 3
-//        // 4 X 5
-//        // 6 7 8
-//        if (c.getX() > 0 && c.getY() > 0) // 1
-//        {
-//            result.add(getCell(gen, c.getX() - 1, c.getY() - 1));
-//        }
-//        if (c.getX() > 0) // 2
-//        {
-//            result.add(getCell(gen, c.getX() - 1, c.getY()));
-//        }
-//        if (c.getX() > 0 && c.getY() < height - 1) // 3
-//        {
-//            result.add(getCell(gen, c.getX() - 1, c.getY() + 1));
-//        }
-//        if (c.getY() > 0) // 4
-//        {
-//            result.add(getCell(gen, c.getX(), c.getY() - 1));
-//        }
-//        if (c.getY() < height - 1) // 5
-//        {
-//            result.add(getCell(gen, c.getX(), c.getY() + 1));
-//        }
-//        if (c.getX() < width - 1 && c.getY() > 0) // 6
-//        {
-//            result.add(getCell(gen, c.getX() + 1, c.getY() - 1));
-//        }
-//        if (c.getX() < width - 1) // 7
-//        {
-//            result.add(getCell(gen, c.getX() + 1, c.getY()));
-//        }
-//        if (c.getX() < width - 1 && c.getY() < height - 1) // 8
-//        {
-//            result.add(getCell(gen, c.getX() + 1, c.getY() + 1));
-//        }
-//        return result;
-//    }
-
+    // Millers stuff
     @Override
     public void loadMap(String s)
     {
-//        initCells();
         Scanner t;
         try
         {
