@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -162,5 +163,26 @@ public class GameMap implements GameInterface
             e.printStackTrace();
         }
 
+    }
+
+    public void printMap2File(int gen, String name) throws Exception
+    {
+        FileWriter fw = new FileWriter(name);
+        HashMap<Integer, CellThread> map = gameMap.get(gen);
+        for (int w = 0; w < width; w++) {
+
+            for (int h = 0; h < height; h++) {
+                int loc = h + w * width;
+                if (map.containsKey(loc)) {
+                    fw.append("X");
+                } else {
+                    fw.append("_");
+                }
+
+            }
+            fw.append("\n");
+        }
+
+        fw.close();
     }
 }

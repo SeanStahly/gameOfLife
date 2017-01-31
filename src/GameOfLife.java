@@ -24,13 +24,11 @@ public class GameOfLife
         for (int i = 1; i < 61; i++)
         {
             g.nextGen();
-            // System.out.println();
-//            g.printMap(i);
             System.out.println("\nIteration " + i);
             g.printMap2(i);
         }
         Long end = System.currentTimeMillis();
         System.out.println("\nSeconds = " + (end - start) / 1000);
-//        g.printMap2File(299, "100x1000-v1-300Iterations.txt");
+        g.printMap2File(60, "30x30-v1-60Iterations.txt");
     }
 }
