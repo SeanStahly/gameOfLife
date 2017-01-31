@@ -1,14 +1,14 @@
 import java.awt.*;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public class GameMap
+public class GameMap implements GameInterface
 {
     public static final boolean					DEBUG	= false;
     HashMap<Integer, HashMap<Integer, CellThread>>	gameMap	= new HashMap<Integer, HashMap<Integer, CellThread>>();
@@ -16,13 +16,16 @@ public class GameMap
     int											height;
     int											gen		= 0;
 
-    public GameMap(int w, int h)
-    {
-        width = w;
-        height = h;
+    public GameMap() {
         gameMap.put(gen, new HashMap<Integer, CellThread>());
-//        initCells();
     }
+//    public GameMap(int w, int h)
+//    {
+//        width = w;
+//        height = h;
+//        gameMap.put(gen, new HashMap<Integer, CellThread>());
+//        initCells();
+//    }
 
 //    private void initCells()
 //    {
@@ -47,6 +50,16 @@ public class GameMap
 //        }
 //        return res;
 //    }
+
+    @Override
+    public void setWidth(int w) {
+        width = w;
+    }
+
+    @Override
+    public void setHeight(int h) {
+        height = h;
+    }
 
     public void setCell(int x, int y)
     {
@@ -77,14 +90,14 @@ public class GameMap
     public void printMap2(int gen)
     {
         Comparator<CellThread> comparator = Comparator.comparing(CellThread::getX);
-//        comparator.thenComparing(Comparator.comparing(p -> p.getY()));
+        comparator.thenComparing(Comparator.comparing(CellThread::getY));
 
-//        nextGen.stream().sorted(comparator);
+
         List<CellThread> cellThreads = new LinkedList<>(
                 gameMap.get(gen).values().stream()
                         .sorted(comparator)
                         .collect(Collectors.toList()));
-//        cellThreads.stream().sorted(comparator).collect(Collectors.toList());
+
         for(CellThread ct : cellThreads) {
             System.out.print(ct.debugString());
         }
@@ -240,4 +253,35 @@ public class GameMap
 //        }
 //        return result;
 //    }
+
+    @Override
+    public void loadMap(String s)
+    {
+//        initCells();
+        Scanner t;
+        try
+        {
+            t = new Scanner(new File(s));
+            for (int h = 0; h < height && t.hasNextLine(); h++)
+            {
+                String line = t.nextLine();
+                System.out.println(line);
+                for (int w = 0; w < width; w++)
+                {
+                    if (line.length() > w && line.charAt(w) == 'X')
+                    {
+                        // System.out.println("cell" + w + "," + h);
+                        setCell(w, h);
+
+                    }
+                }
+            }
+            t.close();
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
 }

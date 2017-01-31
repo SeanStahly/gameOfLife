@@ -332,15 +332,6 @@ public class CellThread implements Callable<List<Point>> {
         if (GameMap.DEBUG)
             result = "[" + x + "," + y + "]";
         result += "X";
-
-//        if (this.isAlive())
-//        {
-//        result += "X";
-//        }
-//        else
-//        {
-//            result += "_";
-//        }
         return result;
     }
 
