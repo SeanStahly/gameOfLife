@@ -1,3 +1,4 @@
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +12,7 @@ public class GameOfLife
 
     public static void main(String[] args)
     {
+        final long startTime = System.currentTimeMillis();
 //				ExecutorService executorService = Executors.newFixedThreadPool(3);
         GameMap g = new GameMap(X_SIZE, Y_SIZE);
 //				for (CellThread ct: g.gameMap.values()) {
@@ -32,18 +34,21 @@ public class GameOfLife
 //				synchronized (g) {
         g.printMap2(0);
 //				}
-        System.out.println();
+//        System.out.println();
         g.nextGen();
 //				ForkJoinPool pool = new ForkJoinPool(3);
 //        for (int i = 1; i < GENERATIONS; i++)
         for (int i = 1; i < 10; i++)
         {
             g.nextGen();
-            System.out.println();
+//            System.out.println();
 //            g.printMap(i);
             System.out.println("\nIteration " + i);
             g.printMap2(i);
         }
+
+        System.out.println();
+        System.out.println("Time: " + (System.currentTimeMillis() - startTime));
 
     }
 }

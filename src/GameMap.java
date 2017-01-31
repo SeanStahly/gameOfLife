@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,9 +76,19 @@ public class GameMap
 
     public void printMap2(int gen)
     {
-        for(CellThread ct : gameMap.get(gen).values()) {
+        Comparator<CellThread> comparator = Comparator.comparing(CellThread::getX);
+//        comparator.thenComparing(Comparator.comparing(p -> p.getY()));
+
+//        nextGen.stream().sorted(comparator);
+        List<CellThread> cellThreads = new LinkedList<>(
+                gameMap.get(gen).values().stream()
+                        .sorted(comparator)
+                        .collect(Collectors.toList()));
+//        cellThreads.stream().sorted(comparator).collect(Collectors.toList());
+        for(CellThread ct : cellThreads) {
             System.out.print(ct.debugString());
         }
+        System.out.println();
         System.out.println("COUNT: "+gameMap.get(gen).values().size());
 
 //        for (int w = 0; w < width; w++)
@@ -129,8 +140,10 @@ public class GameMap
             }
         });
 
-
-        System.out.println("blarg");
+//        nextGen.stream()         .sorted((e1, e2) -> P
+////                .collect(Collectors.toList());
+//
+//        );
         gameMap.put(gen, new HashMap<Integer, CellThread>());
         nextGen.forEach( point -> {
             int loc = point.x + point.y * width;
